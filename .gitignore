@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pkl
+*.joblib
+
+# Data outputs
+taiwan_movie_data.csv
+
+# API secrets
+.api_config/
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project saves
+saved_projects/
