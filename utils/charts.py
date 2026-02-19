@@ -6,8 +6,30 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 from matplotlib.figure import Figure
 from typing import List, Optional, Dict, Tuple
+
+# NOTE: 自動偵測系統可用中文字型，確保中文資料標籤（類型名稱等）正常顯示
+_CJK_FONT_CANDIDATES = [
+    'Microsoft JhengHei',   # Windows 繁體
+    'Noto Sans TC',         # Google 繁體
+    'Microsoft YaHei',      # Windows 簡體（備選）
+    'SimHei',               # Windows 簡體（備選）
+    'PingFang TC',          # macOS 繁體
+    'Heiti TC',             # macOS 繁體
+]
+
+_available_fonts = {f.name for f in fm.fontManager.ttflist}
+_cjk_font = None
+for _candidate in _CJK_FONT_CANDIDATES:
+    if _candidate in _available_fonts:
+        _cjk_font = _candidate
+        break
+
+if _cjk_font:
+    plt.rcParams['font.sans-serif'] = [_cjk_font] + plt.rcParams.get('font.sans-serif', [])
+    plt.rcParams['axes.unicode_minus'] = False
 
 # NOTE: 統一色票，確保全站視覺一致
 COLORS = {
