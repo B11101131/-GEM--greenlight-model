@@ -274,6 +274,6 @@ else:
 - 🔥 全球趨勢追蹤
 
 TMDB API 完全免費，前往 [TMDB](https://www.themoviedb.org/settings/api) 申請。
-👉 設定金鑰：前往「🔌 API 設定」頁面
+👉 設定金鑰：前往「⚙️ 系統設定」頁面
     """)
 

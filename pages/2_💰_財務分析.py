@@ -24,7 +24,7 @@ sim = st.session_state.get('simulation_result')
 params = st.session_state.get('params')
 
 if sim is None:
-    st.warning("⚠️ 請先前往「🎬 風險模擬」頁面執行蒙地卡羅模擬。")
+    st.warning("⚠️ 請先前往「🎬 風險分析」頁面執行蒙地卡羅模擬。")
     st.stop()
 
 net_profit = np.array(sim['net_profit'])
