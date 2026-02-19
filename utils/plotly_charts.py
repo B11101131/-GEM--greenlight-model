@@ -30,26 +30,26 @@ def plotly_profit_distribution(
     loss_vals = net_profit[net_profit < 0]
 
     fig.add_trace(go.Histogram(
-        x=profit_vals, name='獲利區', marker_color='#27AE60',
+        x=profit_vals, name='Profit', marker_color='#27AE60',
         opacity=0.75, nbinsx=40,
     ))
     fig.add_trace(go.Histogram(
-        x=loss_vals, name='虧損區', marker_color='#E74C3C',
+        x=loss_vals, name='Loss', marker_color='#E74C3C',
         opacity=0.75, nbinsx=20,
     ))
 
     # 標記線
     fig.add_vline(x=expected_profit, line_dash="dash", line_color="#2980B9",
-                  annotation_text=f"預期值: {expected_profit:.1f}M")
+                  annotation_text=f"Expected: {expected_profit:.1f}M")
     fig.add_vline(x=p5, line_dash="dot", line_color="#8E44AD",
                   annotation_text=f"P5: {p5:.1f}M")
     fig.add_vline(x=p95, line_dash="dot", line_color="#F39C12",
                   annotation_text=f"P95: {p95:.1f}M")
 
     fig.update_layout(
-        title='獲利分佈圖（互動）',
-        xaxis_title='淨利（百萬 TWD）',
-        yaxis_title='次數',
+        title='Profit Distribution (Interactive)',
+        xaxis_title='Net Profit (TWD, Millions)',
+        yaxis_title='Frequency',
         barmode='overlay',
         template='plotly_white',
         height=450,
@@ -60,7 +60,7 @@ def plotly_profit_distribution(
     return fig
 
 
-def plotly_radar_chart(categories: List[str], values: List[float], title: str = "觀眾輪廓") -> object:
+def plotly_radar_chart(categories: List[str], values: List[float], title: str = "Audience Profile") -> object:
     """
     觀眾輪廓雷達圖。
 
@@ -80,7 +80,7 @@ def plotly_radar_chart(categories: List[str], values: List[float], title: str = 
         fill='toself',
         fillcolor='rgba(41, 128, 185, 0.3)',
         line=dict(color='#2980B9', width=2),
-        name='評分',
+        name='Score',
     ))
 
     fig.update_layout(
@@ -115,7 +115,7 @@ def plotly_confidence_interval(
 
     # AI 預測
     fig.add_trace(go.Bar(
-        x=['AI 預測'],
+        x=['AI Prediction'],
         y=[prediction],
         error_y=dict(
             type='data',
@@ -127,14 +127,14 @@ def plotly_confidence_interval(
             width=10,
         ),
         marker_color='#2980B9',
-        name=f'AI（{confidence_pct}% 信賴區間）',
+        name=f'AI ({confidence_pct}% CI)',
         width=0.3,
     ))
 
     # 手動設定
     manual_mid = (manual_low + manual_high) / 2
     fig.add_trace(go.Bar(
-        x=['手動預估'],
+        x=['Manual Estimate'],
         y=[manual_mid],
         error_y=dict(
             type='data',
@@ -146,13 +146,13 @@ def plotly_confidence_interval(
             width=10,
         ),
         marker_color='#E67E22',
-        name='手動區間',
+        name='Manual Range',
         width=0.3,
     ))
 
     fig.update_layout(
-        title='AI 預測 vs 手動預估',
-        yaxis_title='票房（百萬 TWD）',
+        title='AI Prediction vs Manual Estimate',
+        yaxis_title='Box Office (TWD, Millions)',
         template='plotly_white',
         height=400,
         showlegend=True,
@@ -175,10 +175,10 @@ def plotly_waterfall(
     import plotly.graph_objects as go
 
     fig = go.Figure(go.Waterfall(
-        name="損益拆解",
+        name="Waterfall",
         orientation="v",
         measure=["absolute", "relative", "relative", "relative", "total"],
-        x=["製作預算", "行銷宣發", "院線票房", "串流收入", "淨利"],
+        x=["Budget", "Marketing", "Box Office", "Streaming", "Net Profit"],
         y=[-budget, -marketing, box_office_revenue, streaming_revenue, 0],
         connector={"line": {"color": "#2C3E50", "width": 1}},
         decreasing={"marker": {"color": "#E74C3C"}},
@@ -193,8 +193,8 @@ def plotly_waterfall(
     ))
 
     fig.update_layout(
-        title="財務損益瀑布圖（互動）",
-        yaxis_title="金額（百萬 TWD）",
+        title="Financial Waterfall (Interactive)",
+        yaxis_title="TWD (Millions)",
         template="plotly_white",
         height=450,
         showlegend=False,
@@ -227,9 +227,9 @@ def plotly_topic_heatbar(matched_keywords: List[Dict]) -> object:
     ))
 
     fig.update_layout(
-        title='題材關鍵字熱度',
-        xaxis_title='關鍵字',
-        yaxis_title='熱度分數',
+        title='Keyword Topic Heat',
+        xaxis_title='Keywords',
+        yaxis_title='Heat Score',
         yaxis=dict(range=[0, max(heats) * 1.3]),
         template='plotly_white',
         height=350,
@@ -281,8 +281,8 @@ def plotly_tornado_chart(sensitivity_df: pd.DataFrame) -> object:
     fig.add_vline(x=0, line_color='#2C3E50', line_width=1.5)
 
     fig.update_layout(
-        title='龍捲風圖 — 敏感度分析（互動）',
-        xaxis_title='淨利影響幅度（百萬 TWD）',
+        title='Sensitivity Analysis — Tornado Chart (Interactive)',
+        xaxis_title='Impact on Net Profit (TWD, Millions)',
         template='plotly_white',
         height=400,
         barmode='overlay',
@@ -338,15 +338,15 @@ def plotly_cash_flow(df: pd.DataFrame) -> object:
                   line_width=1, secondary_y=True)
 
     fig.update_layout(
-        title='現金流預測（互動）',
+        title='Cash Flow Projection (Interactive)',
         template='plotly_white',
         height=450,
         legend=dict(x=0.01, y=0.99),
         hovermode='x unified',
     )
     fig.update_xaxes(title_text='月份')
-    fig.update_yaxes(title_text='淨現金流（百萬 TWD）', secondary_y=False)
-    fig.update_yaxes(title_text='累計現金流（百萬 TWD）', secondary_y=True)
+    fig.update_yaxes(title_text='淨現金流 (百萬 TWD)', secondary_y=False)
+    fig.update_yaxes(title_text='累計現金流 (百萬 TWD)', secondary_y=True)
 
     return fig
 
@@ -426,7 +426,7 @@ def plotly_competition_calendar(calendar_df: pd.DataFrame) -> object:
     )
 
     fig.update_layout(
-        title='檔期競爭與假期效應（互動）',
+        title='Release Calendar — Competition & Holiday Factor (Interactive)',
         template='plotly_white',
         height=450,
         legend=dict(x=0.01, y=1.12, orientation='h'),
@@ -484,8 +484,8 @@ def plotly_genre_comparison(df: pd.DataFrame) -> object:
         ))
 
     fig.update_layout(
-        title='各類型票房比較（互動）',
-        yaxis_title='票房（百萬 TWD）',
+        title='Box Office by Genre (Interactive)',
+        yaxis_title='Box Office (TWD, Millions)',
         template='plotly_white',
         height=450,
         hovermode='closest',

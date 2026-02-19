@@ -6,31 +6,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
 from matplotlib.figure import Figure
 from typing import List, Optional, Dict, Tuple
-
-# NOTE: 自動偵測系統可用中文字型，優先使用繁體中文字型
-_CJK_FONT_CANDIDATES = [
-    'Microsoft JhengHei',   # Windows 繁體
-    'Noto Sans TC',         # Google 繁體
-    'Microsoft YaHei',      # Windows 簡體（備選）
-    'SimHei',               # Windows 簡體（備選）
-    'PingFang TC',          # macOS 繁體
-    'Heiti TC',             # macOS 繁體
-]
-
-_available_fonts = {f.name for f in fm.fontManager.ttflist}
-_cjk_font = None
-for _candidate in _CJK_FONT_CANDIDATES:
-    if _candidate in _available_fonts:
-        _cjk_font = _candidate
-        break
-
-if _cjk_font:
-    plt.rcParams['font.sans-serif'] = [_cjk_font] + plt.rcParams.get('font.sans-serif', [])
-    plt.rcParams['axes.unicode_minus'] = False
-
 
 # NOTE: 統一色票，確保全站視覺一致
 COLORS = {
@@ -86,24 +63,24 @@ def plot_profit_distribution(
     bin_edges = np.linspace(auto_edges[0], auto_edges[-1], 50)
 
     ax.hist(losses, bins=bin_edges, color=COLORS['loss'], alpha=0.85,
-            edgecolor="white", linewidth=0.5, label="虧損區")
+            edgecolor="white", linewidth=0.5, label="Loss Zone")
     ax.hist(profits, bins=bin_edges, color=COLORS['profit'], alpha=0.85,
-            edgecolor="white", linewidth=0.5, label="獲利區")
+            edgecolor="white", linewidth=0.5, label="Profit Zone")
 
     ax.axvline(0, color='#C0392B', linestyle="-", linewidth=2.5,
-               label="損益兩平", zorder=5)
+               label="Break-even", zorder=5)
     ax.axvline(expected_profit, color=COLORS['primary'], linestyle="--",
-               linewidth=2.5, label=f"預期值: {expected_profit:.1f}M", zorder=5)
+               linewidth=2.5, label=f"Expected: {expected_profit:.1f}M", zorder=5)
     ax.axvline(p5, color=COLORS['secondary'], linestyle=":", linewidth=2,
                alpha=0.7, label=f"P5: {p5:.1f}M")
     ax.axvline(p95, color=COLORS['secondary'], linestyle=":", linewidth=2,
                alpha=0.7, label=f"P95: {p95:.1f}M")
     ax.axvspan(p5, p95, alpha=0.1, color=COLORS['info'],
-               label='90% 信賴區間')
+               label='90% Confidence Interval')
 
-    ax.set_xlabel("淨利（百萬 TWD）", fontsize=12, fontweight='bold')
-    ax.set_ylabel("次數", fontsize=12, fontweight='bold')
-    ax.set_title("蒙地卡羅模擬 — 獲利分佈圖",
+    ax.set_xlabel("Net Profit (TWD, Millions)", fontsize=12, fontweight='bold')
+    ax.set_ylabel("Frequency", fontsize=12, fontweight='bold')
+    ax.set_title("Monte Carlo Simulation — Profit Distribution",
                  fontsize=14, fontweight='bold', pad=15)
     ax.legend(loc='upper right', framealpha=0.95, fancybox=True,
               shadow=True, fontsize=9)
@@ -128,10 +105,10 @@ def plot_tornado_chart(
 
     ax.barh(y_pos, sensitivity_df['Low Impact'], height=bar_height,
             color=COLORS['loss'], alpha=0.9, edgecolor='white', linewidth=1,
-            label='參數 -20%')
+            label='Parameter -20%')
     ax.barh(y_pos, sensitivity_df['High Impact'], height=bar_height,
             color=COLORS['profit'], alpha=0.9, edgecolor='white', linewidth=1,
-            label='參數 +20%')
+            label='Parameter +20%')
 
     for i, (low, high) in enumerate(
         zip(sensitivity_df['Low Impact'], sensitivity_df['High Impact'])
@@ -147,8 +124,8 @@ def plot_tornado_chart(
     ax.set_yticklabels(sensitivity_df['Parameter'], fontsize=11, fontweight='medium')
     ax.axvline(0, color=COLORS['dark'], linestyle='-', linewidth=2, zorder=5)
 
-    ax.set_xlabel('淨利影響幅度（百萬 TWD）', fontsize=12, fontweight='bold')
-    ax.set_title('龍捲風圖 — 關鍵風險因子',
+    ax.set_xlabel('Impact on Net Profit (TWD, Millions)', fontsize=12, fontweight='bold')
+    ax.set_title('Tornado Chart — Key Risk Drivers',
                  fontsize=14, fontweight='bold', pad=15)
     ax.legend(loc='lower right', framealpha=0.95, fancybox=True,
               shadow=True, fontsize=10)
@@ -180,15 +157,15 @@ def plot_cash_flow(
         COLORS['profit'] if v >= 0 else COLORS['loss'] for v in net_flow
     ]
     ax1.bar(months, net_flow, color=bar_colors, alpha=0.7,
-            edgecolor='white', linewidth=0.5, label='月淨現金流', zorder=2)
+            edgecolor='white', linewidth=0.5, label='Monthly Net Cash Flow', zorder=2)
 
     # 折線圖：累計現金流
     ax2 = ax1.twinx()
     ax2.plot(months, cumulative, color=COLORS['primary'], linewidth=2.5,
-             marker='o', markersize=4, label='累計現金流', zorder=3)
+             marker='o', markersize=4, label='Cumulative Cash Flow', zorder=3)
     ax2.axhline(0, color=COLORS['dark'], linestyle='--', linewidth=1, alpha=0.5)
     ax2.spines['top'].set_visible(False)
-    ax2.set_ylabel('累計現金流（百萬 TWD）', fontsize=11, fontweight='bold')
+    ax2.set_ylabel('Cumulative Cash Flow (TWD, Millions)', fontsize=11, fontweight='bold')
 
     # 標記階段分界
     phases = df['階段'].values
@@ -199,9 +176,9 @@ def plot_cash_flow(
                         linestyle=':', alpha=0.4, linewidth=1)
             prev_phase = phase
 
-    ax1.set_xlabel('月份', fontsize=12, fontweight='bold')
-    ax1.set_ylabel('月淨現金流（百萬 TWD）', fontsize=12, fontweight='bold')
-    ax1.set_title('現金流預測時間軸', fontsize=14, fontweight='bold', pad=15)
+    ax1.set_xlabel('Month', fontsize=12, fontweight='bold')
+    ax1.set_ylabel('Monthly Net Cash Flow (TWD, Millions)', fontsize=12, fontweight='bold')
+    ax1.set_title('Cash Flow Projection Timeline', fontsize=14, fontweight='bold', pad=15)
 
     # 合併圖例
     lines1, labels1 = ax1.get_legend_handles_labels()
@@ -254,7 +231,7 @@ def plot_waterfall(
                     color='gray', linewidth=1, alpha=0.5)
 
     ax.axhline(0, color=COLORS['dark'], linewidth=1.5)
-    ax.set_ylabel('金額（百萬 TWD）', fontsize=12, fontweight='bold')
+    ax.set_ylabel('Amount (TWD, Millions)', fontsize=12, fontweight='bold')
     ax.set_title(title, fontsize=14, fontweight='bold', pad=15)
     plt.xticks(rotation=30, ha='right')
     plt.tight_layout()
@@ -276,7 +253,7 @@ def plot_var_chart(
     fig, ax = _setup_figure(figsize=(10, 6))
 
     ax.hist(net_profit, bins=50, color=COLORS['info'], alpha=0.6,
-            edgecolor='white', linewidth=0.5, label='獲利分佈')
+            edgecolor='white', linewidth=0.5, label='Profit Distribution')
 
     var_colors = ['#F39C12', '#E74C3C', '#8E44AD']
     for i, vr in enumerate(var_results):
@@ -290,11 +267,11 @@ def plot_var_chart(
             ax.hist(tail, bins=30, color=color, alpha=0.3, edgecolor='none')
 
     ax.axvline(0, color=COLORS['dark'], linestyle='-', linewidth=2,
-               label='損益兩平', zorder=5)
+               label='Break-even', zorder=5)
 
-    ax.set_xlabel('淨利（百萬 TWD）', fontsize=12, fontweight='bold')
-    ax.set_ylabel('次數', fontsize=12, fontweight='bold')
-    ax.set_title('風險值 (VaR) 分佈圖', fontsize=14, fontweight='bold', pad=15)
+    ax.set_xlabel('Net Profit (TWD, Millions)', fontsize=12, fontweight='bold')
+    ax.set_ylabel('Frequency', fontsize=12, fontweight='bold')
+    ax.set_title('Value at Risk (VaR) Distribution', fontsize=14, fontweight='bold', pad=15)
     ax.legend(loc='upper right', framealpha=0.95, fancybox=True,
               shadow=True, fontsize=9)
     plt.tight_layout()
@@ -327,7 +304,7 @@ def plot_investor_pie(
         text.set_fontsize(11)
         text.set_fontweight('bold')
 
-    ax.set_title('投資結構', fontsize=14, fontweight='bold', pad=20)
+    ax.set_title('Investment Structure', fontsize=14, fontweight='bold', pad=20)
 
     plt.tight_layout()
     return fig
@@ -367,7 +344,7 @@ def plot_scenario_overlay(
     ax.fill_between(x_range, kde_base(x_range), alpha=0.35,
                     color=COLORS['info'], linewidth=0)
     ax.plot(x_range, kde_base(x_range), color=COLORS['primary'],
-            linewidth=2.5, label=f"{base_name}（基準）")
+            linewidth=2.5, label=f"{base_name} (Baseline)")
     ax.axvline(float(np.mean(base_profit)), color=COLORS['primary'],
                linestyle='--', linewidth=1.5, alpha=0.7)
 
@@ -383,11 +360,11 @@ def plot_scenario_overlay(
                    linestyle='--', linewidth=1.5, alpha=0.7)
 
     ax.axvline(0, color='#C0392B', linestyle='-', linewidth=2.5,
-               label='損益兩平', zorder=5)
+               label='Break-even', zorder=5)
 
-    ax.set_xlabel('淨利（百萬 TWD）', fontsize=12, fontweight='bold')
-    ax.set_ylabel('機率密度', fontsize=12, fontweight='bold')
-    ax.set_title('情境比較 — 獲利分佈疊加圖',
+    ax.set_xlabel('Net Profit (TWD, Millions)', fontsize=12, fontweight='bold')
+    ax.set_ylabel('Probability Density', fontsize=12, fontweight='bold')
+    ax.set_title('Scenario Comparison — Profit Distribution Overlay',
                  fontsize=14, fontweight='bold', pad=15)
     ax.legend(loc='upper right', framealpha=0.95, fancybox=True,
               shadow=True, fontsize=10)
@@ -423,8 +400,8 @@ def plot_genre_box_plot(df: pd.DataFrame) -> Figure:
         patch.set_facecolor(color)
         patch.set_alpha(0.7)
 
-    ax.set_ylabel('票房（百萬 TWD）', fontsize=12, fontweight='bold')
-    ax.set_title('各類型票房分佈', fontsize=14, fontweight='bold', pad=15)
+    ax.set_ylabel('Box Office (TWD, Millions)', fontsize=12, fontweight='bold')
+    ax.set_title('Box Office Distribution by Genre', fontsize=14, fontweight='bold', pad=15)
     ax.grid(axis='y', alpha=0.3)
     plt.tight_layout()
 
@@ -447,7 +424,7 @@ def plot_monthly_heatmap(pivot_df: pd.DataFrame) -> Figure:
     im = ax.imshow(data.T, cmap='YlOrRd', aspect='auto', interpolation='nearest')
 
     ax.set_xticks(range(len(months)))
-    ax.set_xticklabels([f"{m}月" for m in months], fontsize=10)
+    ax.set_xticklabels([f"M{m}" for m in months], fontsize=10)
     ax.set_yticks(range(len(genres)))
     ax.set_yticklabels(genres, fontsize=10)
 
@@ -460,12 +437,12 @@ def plot_monthly_heatmap(pivot_df: pd.DataFrame) -> Figure:
                 ax.text(j, i, f'{val:.0f}', ha='center', va='center',
                         fontsize=9, fontweight='bold', color=text_color)
 
-    ax.set_xlabel('上映月份', fontsize=12, fontweight='bold')
-    ax.set_title('月份 × 類型 平均票房（百萬 TWD）',
+    ax.set_xlabel('Release Month', fontsize=12, fontweight='bold')
+    ax.set_title('Avg. Box Office by Month × Genre (TWD, Millions)',
                  fontsize=14, fontweight='bold', pad=15)
 
     cbar = plt.colorbar(im, ax=ax, shrink=0.8)
-    cbar.set_label('平均票房（百萬）', fontsize=10)
+    cbar.set_label('Avg. Box Office (M)', fontsize=10)
     plt.tight_layout()
 
     return fig
@@ -495,22 +472,22 @@ def plot_competition_bar(calendar_df: pd.DataFrame) -> Figure:
             bar_colors.append(COLORS['profit'])
 
     ax1.bar(months, competition, color=bar_colors, alpha=0.7, edgecolor='white',
-            linewidth=0.5, label='競爭強度', zorder=2)
-    ax1.set_xlabel('月份', fontsize=12, fontweight='bold')
-    ax1.set_ylabel('競爭強度（1-5）', fontsize=12, fontweight='bold')
+            linewidth=0.5, label='Competition Level', zorder=2)
+    ax1.set_xlabel('Month', fontsize=12, fontweight='bold')
+    ax1.set_ylabel('Competition Level (1-5)', fontsize=12, fontweight='bold')
     ax1.set_xticks(months)
-    ax1.set_xticklabels([f"{m}月" for m in months])
+    ax1.set_xticklabels([f"M{m}" for m in months])
     ax1.set_ylim(0, 6)
 
     # 假期效應折線圖
     ax2 = ax1.twinx()
     ax2.plot(months, holiday, color=COLORS['primary'], linewidth=2.5,
-             marker='o', markersize=6, label='假期效應', zorder=3)
-    ax2.set_ylabel('假期效應係數', fontsize=12, fontweight='bold')
+             marker='o', markersize=6, label='Holiday Factor', zorder=3)
+    ax2.set_ylabel('Holiday Factor', fontsize=12, fontweight='bold')
     ax2.set_ylim(0.5, 2.0)
     ax2.spines['top'].set_visible(False)
 
-    ax1.set_title('各月份競爭強度與假期效應',
+    ax1.set_title('Monthly Competition & Holiday Effect',
                   fontsize=14, fontweight='bold', pad=15)
 
     # 合併圖例
